@@ -23,7 +23,9 @@ jobs:
       run: |
         npm install -g snyk
         VULNERABLE_PACKAGES=$(snyk test --all-projects --json | jq -r '.vulnerabilities[] | select(.severity == "critical") .name' | uniq)
-        echo "VULNERABLE_PACKAGES=$VULNERABLE_PACKAGES" >> $GITHUB_ENV
+        echo "VULNERABLE_PACKAGES<<EOF" >> $GITHUB_ENV
+        echo "$VULNERABLE_PACKAGES" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Check for denied packages in pom.xml
       run: |
