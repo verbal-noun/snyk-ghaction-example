@@ -1,0 +1,37 @@
+name: Check Denied Packages with Snyk SCA for Spring Boot
+
+on: [push, pull_request]
+
+jobs:
+  check-packages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'  # Or your desired Java version
+
+    - name: Run Snyk to find vulnerable packages
+      id: snyk
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: |
+        npm install -g snyk
+        VULNERABLE_PACKAGES=$(snyk test --all-projects --json | jq -r '.vulnerabilities[] | select(.severity == "critical") .name' | uniq)
+        echo "VULNERABLE_PACKAGES=$VULNERABLE_PACKAGES" >> $GITHUB_ENV
+
+    - name: Check for denied packages in pom.xml
+      run: |
+        PACKAGES_TO_DENY=($VULNERABLE_PACKAGES)
+        for pkg in "${PACKAGES_TO_DENY[@]}"; do
+          if grep -q "<artifactId>$pkg</artifactId>" pom.xml; then
+            echo "Error: Denied package $pkg found!"
+            exit 1
+          fi
+        done
+        echo "No denied packages found!"
