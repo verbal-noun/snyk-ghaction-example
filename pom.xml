@@ -16,6 +16,13 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+         <!-- Dependency with a known critical vulnerability -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
